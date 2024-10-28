@@ -19,3 +19,6 @@ Command-line arguments:  -os win32 -ws win32 -arch x86_64
 
 !ENTRY org.eclipse.cdt.core 1 0 2024-10-28 15:17:37.847
 !MESSAGE Indexed 'STM32H755_repo_test_CM4' (24 sources, 85 headers) in 3.15 sec: 7,810 declarations; 57,445 references; 0 unresolved inclusions; 1 syntax errors; 2 unresolved names (0.0031%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2024-10-28 17:17:50.905
+!MESSAGE Indexed 'STM32H755_repo_test_CM7' (38 sources, 116 headers) in 3.55 sec: 13,125 declarations; 100,160 references; 0 unresolved inclusions; 1 syntax errors; 2 unresolved names (0.0018%)

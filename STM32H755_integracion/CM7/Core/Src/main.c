@@ -61,8 +61,8 @@ static void MX_TIM13_Init(void);
 static void MX_USART3_UART_Init(void);
 static void MX_TIM14_Init(void);
 /* USER CODE BEGIN PFP */
-void Turning_SetAngle(float angle);
-void SetSpeedMotor(float speed);
+void TurningSetAngle(float angle);
+void SetMotorSpeed(float speed);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -83,7 +83,7 @@ void TurningSetAngle(float angle) {
     __HAL_TIM_SET_COMPARE(&htim13, TIM_CHANNEL_1, pulse);
 }
 
-void SetSpeedMotor(float speed)
+void SetMotorSpeed(float speed)
 {
 	//Limitar el valor de speed
 	if (speed < 0.0f) speed = 0.0f;
@@ -165,7 +165,7 @@ Error_Handler();
   {
     /* USER CODE END WHILE */
 	// Controlar el servo
-	Turning_SetAngle(45.0f);  // Gira el servo a 45 grados
+	TurningSetAngle(45.0f);  // Gira el servo a 45 grados
 	HAL_Delay(1000);
 
 	// Controlar el motor con ESC
@@ -173,7 +173,7 @@ Error_Handler();
 	HAL_Delay(2000);
 
 	// Change Servo angle
-	Turning_SetAngle(-45.0f);  // Gira el servo a -45 grados
+	TurningSetAngle(-45.0f);  // Gira el servo a -45 grados
 	HAL_Delay(1000);
 
 	// Change motor speed and direction

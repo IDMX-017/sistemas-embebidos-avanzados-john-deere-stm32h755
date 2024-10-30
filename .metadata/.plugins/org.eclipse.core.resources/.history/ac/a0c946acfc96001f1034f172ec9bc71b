@@ -61,7 +61,7 @@ static void MX_TIM13_Init(void);
 static void MX_USART3_UART_Init(void);
 static void MX_TIM14_Init(void);
 /* USER CODE BEGIN PFP */
-void TurningSetAngle(float angle); //Angulo
+void TurningSetAngle(float angle);
 void SetMotorSpeed(float speed);
 /* USER CODE END PFP */
 

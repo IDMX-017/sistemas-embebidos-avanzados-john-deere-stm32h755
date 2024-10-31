@@ -52,7 +52,7 @@ UART_HandleTypeDef huart3;
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
-  .stack_size = 128 * 4,
+  .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* USER CODE BEGIN PV */
@@ -114,7 +114,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
-
+  //*acum = 0;
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -258,7 +258,7 @@ void StartDefaultTask(void *argument)
   for(;;)
   {
 	HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin );
-	osDelay(2000);
+    osDelay(2000);
   }
   /* USER CODE END 5 */
 }

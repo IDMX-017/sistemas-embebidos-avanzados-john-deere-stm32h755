@@ -19,10 +19,10 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
-#include <stdio.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stdio.h>
 
 /* USER CODE END Includes */
 
@@ -47,23 +47,26 @@
 
 /* Private variables ---------------------------------------------------------*/
 
+TIM_HandleTypeDef htim17;
+
 UART_HandleTypeDef huart3;
 
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
-  .stack_size = 128 * 4,
+  .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* USER CODE BEGIN PV */
-double *const acum = (double *)0x30000000;
+//double *const acum = (double *)0x30000000;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART3_UART_Init(void);
+static void MX_TIM17_Init(void);
 void StartDefaultTask(void *argument);
 
 /* USER CODE BEGIN PFP */
@@ -134,6 +137,7 @@ Error_Handler();
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART3_UART_Init();
+  MX_TIM17_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -241,6 +245,38 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief TIM17 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM17_Init(void)
+{
+
+  /* USER CODE BEGIN TIM17_Init 0 */
+
+  /* USER CODE END TIM17_Init 0 */
+
+  /* USER CODE BEGIN TIM17_Init 1 */
+
+  /* USER CODE END TIM17_Init 1 */
+  htim17.Instance = TIM17;
+  htim17.Init.Prescaler = 65535;
+  htim17.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim17.Init.Period = 0;
+  htim17.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim17.Init.RepetitionCounter = 0;
+  htim17.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim17) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM17_Init 2 */
+
+  /* USER CODE END TIM17_Init 2 */
+
 }
 
 /**
@@ -382,36 +418,36 @@ static void MX_GPIO_Init(void)
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void *argument)
 {
-	/* USER CODE BEGIN 5 */
-	HAL_TIM_Base_Start(&htim17);
-	#define CANTIDAD_INTERVALOS 10000000
-	double baseIntervalo, fdx, x;
-	double acum = 0;
-	long i;
+  /* USER CODE BEGIN 5 */
+		HAL_TIM_Base_Start(&htim17);
+		#define CANTIDAD_INTERVALOS 10000000
+		double baseIntervalo, fdx, x;
+		double acum = 0;
+		long i;
 
-	baseIntervalo = 1.0 / CANTIDAD_INTERVALOS;
+		baseIntervalo = 1.0 / CANTIDAD_INTERVALOS;
 
-	// Start timer counter
-	uint16_t start_t = __HAL_TIM_GET_COUNTER(&htim17);
+		// Start timer counter
+		uint16_t start_t = __HAL_TIM_GET_COUNTER(&htim17);
 
-	// Perform the calculation of Pi
-	for( i = 0, x = 0.0; i < CANTIDAD_INTERVALOS; i++ ) {
-		fdx = 4 / ( 1 + x * x );
-		acum = acum + ( fdx * baseIntervalo );
-		x = x + baseIntervalo;
-	}
+		// Perform the calculation of Pi
+		for( i = 0, x = 0.0; i < CANTIDAD_INTERVALOS; i++ ) {
+			fdx = 4 / ( 1 + x * x );
+			acum = acum + ( fdx * baseIntervalo );
+			x = x + baseIntervalo;
+		}
 
-	// Stop timer and calculate the elapsed time
-	uint16_t end_t = __HAL_TIM_GET_COUNTER(&htim17);
-	uint16_t total_t = end_t - start_t;
-	printf("Resultado = %20.18lf (%f seconds)\n", acum, ( ( float )total_t * 65535.0 / 240000000.0));
+		// Stop timer and calculate the elapsed time
+		uint16_t end_t = __HAL_TIM_GET_COUNTER(&htim17);
+		uint16_t total_t = end_t - start_t;
+		printf("Resultado = %20.18lf (%f seconds)\n", acum, ( ( float )total_t * 65535.0 / 240000000.0));
 
-  /* Infinite loop */
-  for(;;)
-  {
-	HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin );
-	osDelay(1000);
-  }
+	  /* Infinite loop */
+	  for(;;)
+	  {
+		HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin );
+	    osDelay(1000);
+	  }
 
   /* USER CODE END 5 */
 }

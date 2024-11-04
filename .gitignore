@@ -1,1 +1,6 @@
 .metadata/
+.settings/
+*.prefs
+*.snap
+*.index
+

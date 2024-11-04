@@ -1,0 +1,10 @@
+LaunchTargetManager/org.eclipse.launchbar.core.launchTargetType.local,Local/arch=x86_64
+LaunchTargetManager/org.eclipse.launchbar.core.launchTargetType.local,Local/name=Local
+LaunchTargetManager/org.eclipse.launchbar.core.launchTargetType.local,Local/os=win32
+configDescList=org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:STM32H755_Parallelization_CM4 Debug,org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:STM32H755_Parallelization_CM7 Debug,org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:STM32H755_repo_test_CM4 Debug,org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:STM32H755_repo_test_CM7 Debug
+eclipse.preferences.version=1
+org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:STM32H755_Parallelization_CM4\ Debug/activeLaunchMode=run
+org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:STM32H755_Parallelization_CM4\ Debug/activeLaunchTarget=null\:---
+org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:STM32H755_repo_test_CM4\ Debug/activeLaunchMode=run
+org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:STM32H755_repo_test_CM4\ Debug/activeLaunchTarget=null\:---
+org.eclipse.launchbar.core.descriptorType.default\:STM32H755_Parallelization_CM7\ Debug/activeLaunchTarget=org.eclipse.launchbar.core.launchTargetType.local\:Local

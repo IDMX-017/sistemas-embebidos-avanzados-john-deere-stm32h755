@@ -1,0 +1,10 @@
+18:34:35 **** Incremental Build of configuration Debug for project STM32H755_repo_test_CM7 ****
+make -j12 all 
+arm-none-eabi-size  STM32H755_repo_test_CM7.elf 
+   text	   data	    bss	    dec	    hex	filename
+  46740	    476	  21132	  68348	  10afc	STM32H755_repo_test_CM7.elf
+Finished building: default.size.stdout
+ 
+
+18:34:35 Build Finished. 0 errors, 0 warnings. (took 592ms)
+

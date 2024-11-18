@@ -158,27 +158,48 @@ Error_Handler();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
-
+  if (HAL_TIM_PWM_Start(&htim14, TIM_CHANNEL_1) != HAL_OK)
+  {
+  	  Error_Handler();
+  }
+  SetMotorSpeed(0.0);
+  HAL_Delay(100);
+  SetMotorSpeed(0.25);
+  HAL_Delay(100);
+  SetMotorSpeed(0.5);
+  HAL_Delay(100);
+  SetMotorSpeed(0.75);
+  HAL_Delay(100);
+  SetMotorSpeed(1.0);
+  HAL_Delay(100);
+  SetMotorSpeed(0.75);
+  HAL_Delay(100);
+  SetMotorSpeed(0.5);
+  HAL_Delay(100);
+  SetMotorSpeed(0.25);
+  HAL_Delay(100);
+  SetMotorSpeed(0.1);
+  HAL_Delay(100);
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
     /* USER CODE END WHILE */
-	// Controlar el servo
-	TurningSetAngle(45.0f);  // Gira el servo a 45 grados
-	HAL_Delay(1000);
+	  SetMotorSpeed(1.0);
+	  HAL_Delay(5000);
 
-	// Controlar el motor con ESC
-	SetMotorSpeed(0.75);
-	HAL_Delay(2000);
 
-	// Change Servo angle
-	TurningSetAngle(-45.0f);  // Gira el servo a -45 grados
-	HAL_Delay(1000);
+	  /*SetMotorSpeed(0.5);
+	  HAL_Delay(1000);
+	  SetMotorSpeed(0.1);
+	  HAL_Delay(5000);*/
 
-	// Change motor speed and direction
-	SetMotorSpeed(0.25);
-	HAL_Delay(2000);
+
+	  //SetMotorSpeed(0.75);
+	  //HAL_Delay(2000);
+	  //SetMotorSpeed(0.25);
+
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

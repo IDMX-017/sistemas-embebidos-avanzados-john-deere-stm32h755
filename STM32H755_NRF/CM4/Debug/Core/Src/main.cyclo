@@ -1,0 +1,5 @@
+../Core/Src/main.c:70:5:main	2
+../Core/Src/main.c:125:6:PeriphCommonClock_Config	2
+../Core/Src/main.c:144:6:MX_SPI1_Init	2
+../Core/Src/main.c:192:6:MX_USART3_UART_Init	5
+../Core/Src/main.c:243:6:Error_Handler	1

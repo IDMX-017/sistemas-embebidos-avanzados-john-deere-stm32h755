@@ -1,0 +1,4 @@
+../Core/Src/control_routines.c:28:6:Servo_Init	8	static
+../Core/Src/control_routines.c:37:6:Motor_Init	8	static
+../Core/Src/control_routines.c:46:6:Motor_SetSpeedV3	24	static
+../Core/Src/control_routines.c:53:6:Servo_SetAngleV3	24	static

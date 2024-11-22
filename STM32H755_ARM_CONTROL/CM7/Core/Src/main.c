@@ -21,6 +21,10 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+//#include <stdio.h>
+#include "robot_control.h"
+#include "control_routines.h"
+#include "myprintf.h"
 
 /* USER CODE END Includes */
 
@@ -40,10 +44,16 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
+#define RAD_TO_DEG 57.2957795f
 
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+
+TIM_HandleTypeDef htim13;
+TIM_HandleTypeDef htim14;
+
+UART_HandleTypeDef huart3;
 
 /* USER CODE BEGIN PV */
 
@@ -52,13 +62,27 @@
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_TIM13_Init(void);
+static void MX_TIM14_Init(void);
+static void MX_USART3_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+// Inicialización de Waypoints
+Waypoint waypoints_array[2] = {
+	{1.0f, 1.0f, 0},  // Waypoint 1
+	{2.0f, 2.0f, 0}   // Waypoint 2
+};
+Path trayectory = {waypoints_array, 2, 0};
+RobotState StateRobot = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
 
+volatile RobotControl ControlSignaling = {0.0f, 0.0f};
+
+//static Status Robot_status = IDLE;
+arm_pid_instance_f32 pid_delta;
 /* USER CODE END 0 */
 
 /**
@@ -90,7 +114,9 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+  //Servo_Init(htim13);
+  //Motor_Init(htim14);
+  PID_Init(&pid_delta, 0.5f, 0.05f, 0.001f);
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -114,13 +140,33 @@ Error_Handler();
 /* USER CODE END Boot_Mode_Sequence_2 */
 
   /* USER CODE BEGIN SysInit */
+	arm_pid_instance_f32 pid;
+
+	// Inicialización
+	pid.Kp = 1.0f;  // Ganancia proporcional
+	pid.Ki = 0.5f;  // Ganancia integral
+	pid.Kd = 0.01f; // Ganancia derivativa
+
+	// Llamar a la función de inicialización
+	arm_pid_init_f32(&pid, 1);  // 1: reset del estado interno del PID
+
+	float32_t setpoint_angle = 45.0f; // Ángulo deseado
+	float32_t current_angle = 0.0f;   // Ángulo inicial
+	float32_t pid_output = 0.0f;      // Salida del PID
+	float32_t dt = 0.1f;              // Intervalo de tiempo (100 ms)
 
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_TIM13_Init();
+  MX_TIM14_Init();
+  MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
-
+  float32_t delton = 0.0f;
+  float32_t velocidad = 0.0f;
+  float32_t pid_control = 0.0f;
+  //float32_t dt = 0.1f;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -128,6 +174,65 @@ Error_Handler();
   while (1)
   {
     /* USER CODE END WHILE */
+	  /*
+	  printf("Ya prendi\n\r\r");
+	  PURE_PURSUIT(&StateRobot, &delton, &velocidad, &trayectory);
+	  pid_control = PID_Angle(&pid_delta, delton, StateRobot.delta);
+	  printf("Posicion del robot actual: (%f, %f, %f)\n\n\r\r", StateRobot.x, StateRobot.y, StateRobot.delta);
+	  printf("Angulo Necesario para alcanzar el waypoint: (%f)\n\n\r\r", delton);
+	  printf("Señal de Control del PID:  %f\n\n\r\r", pid_control);
+	  printf("Señal de Velocidad de la chingadera:  %f\n\n\r\r", velocidad);
+	  StateRobot.delta = pid_control;
+	  HAL_Delay(500);
+	  */
+	  /*
+	  for (int i = 0; i < 100; i++) {
+	      // Calcular el error
+	      float error = setpoint_angle - current_angle;
+
+	      // Calcular la salida del PID
+	      pid_output = arm_pid_f32(&pid, error);
+
+	      // Simular el sistema (por ejemplo, movimiento del ángulo)
+	      current_angle += pid_output * dt;
+
+	      // Mostrar resultados
+	      printf("Iteración %d: Salida PID: %.2f, Ángulo actual: %.2f\n\n\r\r",
+	             i, pid_output, current_angle);
+
+	      // Simular un retardo si estuvieras en hardware
+	      HAL_Delay(100);
+	  }
+	  */
+
+	  //HAL_Delay(100);
+	  // Simulación
+	  for (int i = 0; i < 50; i++) {
+		  printf("Iteración %d\n", i);
+
+		  // Calcular el ángulo y la velocidad deseada usando PURE_PURSUIT
+		  PURE_PURSUIT(&StateRobot, &delton, &velocidad, &trayectory);
+
+		  // Calcular la señal de control del PID
+		  pid_control = PID_Angle(&pid_delta, delton, StateRobot.delta);
+
+		  // Imprimir valores
+		  printf("Posición actual del robot: (%.2f, %.2f, %.2f°)\n\r",
+				 StateRobot.x, StateRobot.y, StateRobot.theta * RAD_TO_DEG);
+		  printf("Ángulo deseado hacia el waypoint: %.2f°\n\r", delton * RAD_TO_DEG);
+		  printf("Señal de control del PID: %.2f\n\r", pid_control);
+		  printf("Velocidad lineal deseada: %.2f m/s\n\r", velocidad);
+
+		  // Actualizar el estado del robot (simulación física básica)
+		  StateRobot.delta = pid_control;
+		  StateRobot.theta += StateRobot.delta * 0.1f;  // Cambio de orientación basado en delta
+		  StateRobot.x += velocidad * cos(StateRobot.theta) * 0.1f; // Movimiento en X
+		  StateRobot.y += velocidad * sin(StateRobot.theta) * 0.1f; // Movimiento en Y
+
+		  // Pausa entre iteraciones (si fuera en hardware)
+		  HAL_Delay(10);
+		  printf("\n\r");
+	  }
 
     /* USER CODE BEGIN 3 */
   }
@@ -193,6 +298,146 @@ void SystemClock_Config(void)
 }
 
 /**
+  * @brief TIM13 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM13_Init(void)
+{
+
+  /* USER CODE BEGIN TIM13_Init 0 */
+
+  /* USER CODE END TIM13_Init 0 */
+
+  TIM_OC_InitTypeDef sConfigOC = {0};
+
+  /* USER CODE BEGIN TIM13_Init 1 */
+
+  /* USER CODE END TIM13_Init 1 */
+  htim13.Instance = TIM13;
+  htim13.Init.Prescaler = 239;
+  htim13.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim13.Init.Period = 19999;
+  htim13.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim13.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim13) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_Init(&htim13) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 0;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim13, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM13_Init 2 */
+
+  /* USER CODE END TIM13_Init 2 */
+  HAL_TIM_MspPostInit(&htim13);
+
+}
+
+/**
+  * @brief TIM14 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM14_Init(void)
+{
+
+  /* USER CODE BEGIN TIM14_Init 0 */
+
+  /* USER CODE END TIM14_Init 0 */
+
+  TIM_OC_InitTypeDef sConfigOC = {0};
+
+  /* USER CODE BEGIN TIM14_Init 1 */
+
+  /* USER CODE END TIM14_Init 1 */
+  htim14.Instance = TIM14;
+  htim14.Init.Prescaler = 239;
+  htim14.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim14.Init.Period = 19999;
+  htim14.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim14.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim14) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_Init(&htim14) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 0;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim14, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM14_Init 2 */
+
+  /* USER CODE END TIM14_Init 2 */
+  HAL_TIM_MspPostInit(&htim14);
+
+}
+
+/**
+  * @brief USART3 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART3_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART3_Init 0 */
+
+  /* USER CODE END USART3_Init 0 */
+
+  /* USER CODE BEGIN USART3_Init 1 */
+
+  /* USER CODE END USART3_Init 1 */
+  huart3.Instance = USART3;
+  huart3.Init.BaudRate = 115200;
+  huart3.Init.WordLength = UART_WORDLENGTH_8B;
+  huart3.Init.StopBits = UART_STOPBITS_1;
+  huart3.Init.Parity = UART_PARITY_NONE;
+  huart3.Init.Mode = UART_MODE_TX_RX;
+  huart3.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart3.Init.OverSampling = UART_OVERSAMPLING_16;
+  huart3.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+  huart3.Init.ClockPrescaler = UART_PRESCALER_DIV1;
+  huart3.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+  if (HAL_UART_Init(&huart3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_UARTEx_SetTxFifoThreshold(&huart3, UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_UARTEx_SetRxFifoThreshold(&huart3, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_UARTEx_DisableFifoMode(&huart3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART3_Init 2 */
+
+  /* USER CODE END USART3_Init 2 */
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -204,6 +449,7 @@ static void MX_GPIO_Init(void)
 /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOF_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
@@ -233,14 +479,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   GPIO_InitStruct.Alternate = GPIO_AF11_ETH;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : PD8 PD9 */
-  GPIO_InitStruct.Pin = GPIO_PIN_8|GPIO_PIN_9;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  GPIO_InitStruct.Alternate = GPIO_AF7_USART3;
-  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PA8 PA11 PA12 */
   GPIO_InitStruct.Pin = GPIO_PIN_8|GPIO_PIN_11|GPIO_PIN_12;

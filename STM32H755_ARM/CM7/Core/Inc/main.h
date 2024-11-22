@@ -34,6 +34,7 @@ extern "C" {
 #define ARM_MATH_CM7
 #include "arm_math.h"
 #include "robot_control.h"
+#include "myprintf.h"
 //#include "MY_NRF24.h"
 #include <stdbool.h>
 #include <stdio.h>

@@ -10,7 +10,7 @@
 #include <math.h>
 #include "robot_control.h"
 
-arm_pid_instance_f32 pid_delta;
+
 static Status Robot_status = IDLE;
 
 void robot_init(RobotState *state)
@@ -83,7 +83,9 @@ void PURE_PURSUIT(RobotState *state, float32_t *desired_delta, float32_t *desire
 		dy = current_waypoint.y - state->y;
 		arm_sqrt_f32(dx * dx + dy * dy, &distance);
 
-		if (distance < waypoint_tolerance) {
+		//printf("dx: %.2f, dy: %.2f, atan2: %.2f degrees\n", dx, dy, atan2f(dy, dx));
+
+		if (distance < waypoint_tolerance || current_waypoint.flag == 1) {
 			/* Avanzar al siguiente waypoint */
 			path->waypoints[target_index].flag = 1;
 			target_index++;
@@ -98,7 +100,7 @@ void PURE_PURSUIT(RobotState *state, float32_t *desired_delta, float32_t *desire
     if (target_index >= path->length) {
         *desired_v = 0.0f;
         *desired_delta = 0.0f;
-        Robot_status = IDLE;
+        //Robot_status = IDLE;
         return;
     }
 
@@ -137,9 +139,11 @@ void PURE_PURSUIT(RobotState *state, float32_t *desired_delta, float32_t *desire
 	/* Calcular el vector hacia el siguiente waypoint */
     dx = target_x - state->x;
     dy = target_y - state->y;
+    //printf("Target Point: (%.2f, %.2f)\n", target_x, target_y);
     float32_t angle_to_target = (float32_t)atan2f(dy, dx);
-
+    //printf("dx: %.2f, dy: %.2f, atan2: %.2f degrees\n", dx, dy, atan2f(dy, dx));
     float32_t alpha = normalize_angle(angle_to_target - state->theta);
+    //printf("Alpha (normalized): %.2f degrees\n", alpha);
 
 	float32_t gamma = (2.0f*arm_sin_f32(alpha))/LD;
 
@@ -159,6 +163,8 @@ void PURE_PURSUIT(RobotState *state, float32_t *desired_delta, float32_t *desire
 
 	/* Saturar la Velocidad Deseada */
 	*desired_v = saturate(*desired_v, V_MIN, V_MAX);
+	//printf("Delta limits: [%.2f, %.2f]\n", -DELTA_MAX , DELTA_MAX);
+
 }
 
 void catmull_rom_spline(Waypoint p0, Waypoint p1, Waypoint p2, Waypoint p3, float32_t t, Waypoint *result) {

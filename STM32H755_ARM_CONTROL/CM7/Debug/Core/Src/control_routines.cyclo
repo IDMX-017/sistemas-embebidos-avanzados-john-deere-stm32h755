@@ -1,0 +1,4 @@
+../Core/Src/control_routines.c:28:6:Servo_Init	2
+../Core/Src/control_routines.c:37:6:Motor_Init	2
+../Core/Src/control_routines.c:46:6:Motor_SetSpeedV3	1
+../Core/Src/control_routines.c:53:6:Servo_SetAngleV3	1
